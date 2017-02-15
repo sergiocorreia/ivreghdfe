@@ -615,6 +615,7 @@ di in r "       in combination with -partial- option."
 				assert `absorb_ct' != .
 				if (`absorb_ct'==0) local absorb_ct 1 // adjustment to match ivreg2 and old reghdfe (happens if absvar is nested in cluster)
 				local partial_ct 0
+				local partialcons `absorb_ct'
 			}
 
 			if ("`partial1'" != "" | `partialcons'==1) {
@@ -3281,8 +3282,8 @@ program define PostFirstRF, eclass
 
 	if ("`absorb'" != "") {
 		mata: HDFE.output.post_footnote()
+		assert e(N_hdfe) != .
 	}
-	asd2
 end
 
 
