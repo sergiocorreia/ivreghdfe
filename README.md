@@ -13,5 +13,15 @@ ssc install ivreg2
 Install ivreg2hdfe (fake name so it doesn't clash)
 
 ```
+cap ado uninstall ivreg2hdfe
 net install ivreg2hdfe, from(https://github.com/sergiocorreia/ivreg2_demo/raw/master/)
+```
+
+
+### Install locally:
+
+
+```
+cap ado uninstall ivreg2hdfe
+net install ivreg2hdfe, from(c:\git\ivreg2_demo)
 ```

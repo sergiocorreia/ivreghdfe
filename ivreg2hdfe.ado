@@ -86,7 +86,7 @@ di as err "invalid syntax - cannot use by with replay"
 		if replay() {
 			ereturn local cmd "`ivreg2cmd'"
 			`ivreg2cmd' `0'
-			ereturn local cmd "ivreg2hdfe"
+			ereturn local cmd "ivreg2"
 
 		}
 		else {
@@ -108,6 +108,7 @@ di as err "invalid syntax - cannot use by with replay"
 // If not replay, call ivreg211 and then add macros
 	else {
 		`BY' ivreg211 `0'
+		cap mata: mata drop HDFE // prefix ivreg211 call with capture?
 		ereturn local cmd "ivreg2hdfe"
 		ereturn local ivreg2cmd "ivreg2hdfe"
 		ereturn local version `lversion'
@@ -205,6 +206,7 @@ program define ivreg211, eclass byable(recall) sortpreserve
 				LIML COVIV FULLER(real 0) Kclass(real 0)			///
 				ORTHOG(string) ENDOGtest(string) REDundant(string)	///
 				PARTIAL(string) FWL(string)							///
+				Absorb(string)           							///
 				Level(integer $S_level)								///
 				NOHEader NOFOoter NOOUTput							///
 				bvclean NOOMITTED omitted vsquish noemptycells		///
@@ -218,6 +220,14 @@ program define ivreg211, eclass byable(recall) sortpreserve
 				NOPARTIALSMALL										///
 				fvall fvsep											///
 				]
+
+// absorb implies...
+	if (`"`absorb'"' != "") {
+		local small small
+		local noconstant noconstant
+		local nopartialsmall
+	}
+
 
 // Parse after clearing any sreturn macros (can be left behind in Stata 11)
 		sreturn clear
@@ -362,6 +372,22 @@ program define ivreg211, eclass byable(recall) sortpreserve
 		else {
 			markout `touse' `lhs' `inexog' `exexog' `endo' `cluster', strok
 		}
+
+		* Create HDFE object and update touse
+		if (`"`absorb'"' != "") {
+			ms_parse_absvars `absorb'
+			// s(absvars) has quotes which we need to remove
+			local absvars `"`s(absvars)'"'
+			local absvars : subinstr local absvars `"""' `""', all
+			markout `touse' `absvars', strok
+
+			mata: HDFE = fixed_effects("`absorb'", "`touse'", "`weight'", "`wvar'", 0, 0)
+			mata: HDFE.options.clustervars = HDFE.options.base_clustervars = tokens("`cluster'")
+			mata: HDFE.options.num_clusters = length(HDFE.options.clustervars)
+			mata: HDFE.estimate_dof() // compute degrees-of-freedom
+			mata: HDFE.save_touse("`touse'", 1) // 1 = overwrite
+		}
+
 
 ********************************************************************************
 // weight factor and sample size
@@ -532,7 +558,7 @@ di as err "Error: `wrongvars' listed in redundant() but does not appear as exoge
 // *************** Partial-out block ************** //
 
 // `partial' has all to be partialled out except for constant
-		if "`partial1'" != "" | `partialcons'==1 {
+		if "`partial1'" != "" | `partialcons'==1 | "`absorb'" != "" {
 			preserve
 
 // Remove partial0 from inexog0.
@@ -581,19 +607,31 @@ di in r "       in combination with -partial- option."
 // Partial out
 // But first replace everything with doubles
 			recast double `fv_lhs1' `fv_endo1' `fv_inexog1' `fv_exexog1' `fv_partial1'
-			mata: s_partial	("`fv_lhs1'",			///
-							"`fv_endo1'",			///
-							"`fv_inexog1'",			///
-							"`fv_exexog1'",			///
-							"`fv_partial1'",		///
-							"`touse'",				///
-							"`weight'",				///
-							"`wvar'",				///
-							`wf',					///
-							`N',					///
-							`cons')
 
-			local partial_ct : word count `partial1'
+			if ("`absorb'" != "") {
+				local hdfe_varlist `fv_lhs1' `fv_endo1' `fv_inexog1' `fv_exexog1' `fv_partial1'
+				mata: st_store(HDFE.sample, tokens("`hdfe_varlist'"), HDFE.partial_out(tokens("`hdfe_varlist'")))
+				mata: st_local("absorb_ct", strofreal(HDFE.output.df_a))
+				assert `absorb_ct' != .
+				if (`absorb_ct'==0) local absorb_ct 1 // adjustment to match ivreg2 and old reghdfe (happens if absvar is nested in cluster)
+				local partial_ct 0
+			}
+
+			if ("`partial1'" != "" | `partialcons'==1) {
+				mata: s_partial	("`fv_lhs1'",			///
+								"`fv_endo1'",			///
+								"`fv_inexog1'",			///
+								"`fv_exexog1'",			///
+								"`fv_partial1'",		///
+								"`touse'",				///
+								"`weight'",				///
+								"`wvar'",				///
+								`wf',					///
+								`N',					///
+								`cons')
+				local partial_ct : word count `partial1'
+			}
+
 // Constant is partialled out, unless nocons already specified in the first place
 			capture drop `ones'
 			local ones ""
@@ -602,6 +640,10 @@ di in r "       in combination with -partial- option."
 				local partial_ct = `partial_ct' + 1
 				local noconstant "noconstant"
 				local cons 0
+			}
+
+			if ("`absorb'" != "") {
+				local partial_ct = `partial_ct' + `absorb_ct'
 			}
 		}
 		else {
@@ -1822,7 +1864,7 @@ di in r "       including constant."
 *******************************************************************************************
 
 // restore data if preserved for partial option
-		if `partial_ct' {
+		if (`partial_ct' | "`absorb'"!="") {
 			restore
 		}
 
@@ -2209,6 +2251,11 @@ di in red "Error: estimation failed - could not post estimation results"
 		}
 		if "`sw'"~="" {
 			ereturn local hacsubtitleV "Stock-Watson heteroskedastic-robust statistics (BETA VERSION)"
+		}
+
+		if ("`absorb'" != "") {
+			mata: HDFE.output.post_footnote()
+			assert e(N_hdfe) != .
 		}
 	}
 
@@ -2686,6 +2733,8 @@ di in gr _col(23) "    variables in regressor count K"
 			Disp `e(ecollin)', _col(23)
 		}
 		di in smcl in gr "{hline 78}"
+
+		if (e(N_hdfe)!=  .) reghdfe_footnote
 	}
 end
 
@@ -3230,6 +3279,10 @@ program define PostFirstRF, eclass
 		ereturn local hacsubtitleV "Stock-Watson heteroskedastic-robust statistics (BETA VERSION)"
 	}
 
+	if ("`absorb'" != "") {
+		mata: HDFE.output.post_footnote()
+	}
+	asd2
 end
 
 
