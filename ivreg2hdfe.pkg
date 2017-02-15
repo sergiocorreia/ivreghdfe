@@ -1,0 +1,5 @@
+v 3
+
+d ivreg2 demo
+
+f ivreg2hdfe.ado
