@@ -35,7 +35,7 @@ if c(version) < 12 & c(version) >= 9 {
 
 * Parent program, forks to versions as appropriate after version call
 * Requires byable(onecall)
-program define ivreg2, eclass byable(onecall) /* properties(svyj) */ sortpreserve
+program define ivreg2hdfe, eclass byable(onecall) /* properties(svyj) */ sortpreserve
 	local lversion 04.1.10
 
 * Minimum of version 8 required for parent program (earliest ivreg2 is ivreg28)
@@ -86,13 +86,13 @@ di as err "invalid syntax - cannot use by with replay"
 		if replay() {
 			ereturn local cmd "`ivreg2cmd'"
 			`ivreg2cmd' `0'
-			ereturn local cmd "ivreg2"
+			ereturn local cmd "ivreg2hdfe"
 
 		}
 		else {
 * If not replay, call legacy ivreg2 and then add macros
 			`BY' `ivreg2cmd' `0'
-			ereturn local cmd "ivreg2"
+			ereturn local cmd "ivreg2hdfe"
 			ereturn local ivreg2cmd "`ivreg2cmd'"
 			ereturn local version `lversion'
 			ereturn local predict ivreg2_p
@@ -108,8 +108,8 @@ di as err "invalid syntax - cannot use by with replay"
 // If not replay, call ivreg211 and then add macros
 	else {
 		`BY' ivreg211 `0'
-		ereturn local cmd "ivreg2"
-		ereturn local ivreg2cmd "ivreg2"
+		ereturn local cmd "ivreg2hdfe"
+		ereturn local ivreg2cmd "ivreg2hdfe"
 		ereturn local version `lversion'
 		ereturn local predict ivreg2_p
 	}
@@ -166,7 +166,7 @@ program define ivreg211, eclass byable(recall) sortpreserve
 			ereturn local version `lversion'
 			exit
 		}
-		if `"`e(cmd)'"' != "ivreg2"  {
+		if `"`e(cmd)'"' != "ivreg2hdfe"  {
 			error 301
 		}
 // Set display options

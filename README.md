@@ -13,5 +13,5 @@ ssc install ivreg2
 Install ivreg2hdfe (fake name so it doesn't clash)
 
 ```
-net install ivreg2hdfe, from(https://github.com/sergiocorreia/ivreg2demo/raw/master/)
+net install ivreg2hdfe, from(https://github.com/sergiocorreia/ivreg2_demo/raw/master/)
 ```
