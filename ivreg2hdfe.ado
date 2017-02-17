@@ -232,9 +232,10 @@ program define ivreg211, eclass byable(recall) sortpreserve
 			di in smcl `"{stata `"net install reghdfe, from(`url')"':net install reghdfe, from(`url')}"'
 			exit 601
 		}
-		reghdfe, check // ensure the .mlib exists
 		cap reghdfe, requirements // ensure ftools, moresyntax, etc. are installed
 		if (c(rc)) reghdfe, requirements
+		
+		reghdfe, check // ensure the .mlib exists
 
 		// absorb implies...
 		local small small
