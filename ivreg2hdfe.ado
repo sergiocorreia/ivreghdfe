@@ -221,8 +221,22 @@ program define ivreg211, eclass byable(recall) sortpreserve
 				fvall fvsep											///
 				]
 
-// absorb implies...
 	if (`"`absorb'"' != "") {
+		// ensure reghdfe is installed
+		capture which reghdfe
+		if c(rc) {
+			di as err "Error: must have reghdfe installed"
+			di as err "To install, from within Stata type " _c
+			//di in smcl "{stata ssc install reghdfe :ssc install reghdfe}"
+			loc url "https://github.com/sergiocorreia/reghdfe/raw/version-4/src/"
+			di in smcl `"{stata `"net install reghdfe, from(`url')"':net install reghdfe, from(`url')}"'
+			exit 601
+		}
+		reghdfe, check // ensure the .mlib exists
+		cap reghdfe, requirements // ensure ftools, moresyntax, etc. are installed
+		if (c(rc)) reghdfe, requirements
+
+		// absorb implies...
 		local small small
 		local noconstant noconstant
 		local nopartialsmall
@@ -375,19 +389,14 @@ program define ivreg211, eclass byable(recall) sortpreserve
 
 		* Create HDFE object and update touse
 		if (`"`absorb'"' != "") {
-			ms_parse_absvars `absorb'
-			// s(absvars) has quotes which we need to remove
-			local absvars `"`s(absvars)'"'
-			local absvars : subinstr local absvars `"""' `""', all
-			markout `touse' `absvars', strok
-
-			mata: HDFE = fixed_effects("`absorb'", "`touse'", "`weight'", "`wvar'", 0, 0)
-			mata: HDFE.options.clustervars = HDFE.options.base_clustervars = tokens("`cluster'")
-			mata: HDFE.options.num_clusters = length(HDFE.options.clustervars)
+			* fixed_effects(absvars | , touse, wtype, wtvar, dropsing, verbose)
+			mata: HDFE = fixed_effects("`absorb'", "`touse'", "`weight'", "`wvar'")
+			_assert ("`s(options)'"==""), msg("unsupported options in {bf:absorb()}: `s(options)'")
+			mata: HDFE.clustervars = HDFE.base_clustervars = tokens("`cluster'")
+			mata: HDFE.num_clusters = length(HDFE.clustervars)
 			mata: HDFE.estimate_dof() // compute degrees-of-freedom
 			mata: HDFE.save_touse("`touse'", 1) // 1 = overwrite
 		}
-
 
 ********************************************************************************
 // weight factor and sample size
@@ -611,8 +620,8 @@ di in r "       in combination with -partial- option."
 			if ("`absorb'" != "") {
 				local hdfe_varlist `fv_lhs1' `fv_endo1' `fv_inexog1' `fv_exexog1' `fv_partial1'
 				mata: st_store(HDFE.sample, tokens("`hdfe_varlist'"), HDFE.partial_out(tokens("`hdfe_varlist'")))
-				mata: st_local("absorb_ct", strofreal(HDFE.output.df_a))
-				assert `absorb_ct' != .
+				mata: st_local("absorb_ct", strofreal(HDFE.df_a))
+				assert `absorb_ct'`' != .
 				if (`absorb_ct'==0) local absorb_ct 1 // adjustment to match ivreg2 and old reghdfe (happens if absvar is nested in cluster)
 				local partial_ct 0
 				local partialcons `absorb_ct'
@@ -2255,7 +2264,7 @@ di in red "Error: estimation failed - could not post estimation results"
 		}
 
 		if ("`absorb'" != "") {
-			mata: HDFE.output.post_footnote()
+			mata: HDFE.post_footnote()
 			assert e(N_hdfe) != .
 		}
 	}
@@ -3281,7 +3290,7 @@ program define PostFirstRF, eclass
 	}
 
 	if ("`absorb'" != "") {
-		mata: HDFE.output.post_footnote()
+		mata: HDFE.post_footnote()
 		assert e(N_hdfe) != .
 	}
 end
