@@ -1,3 +1,5 @@
+*! ivreg2hdfe 0.0.2  23jun2017
+*! this just adds absorb() to this code:
 *! ivreg2 4.1.10  9Feb2016
 *! authors cfb & mes
 *! see end of file for version comments
