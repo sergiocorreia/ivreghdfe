@@ -64,3 +64,21 @@ This is gives the same result as using the old version of reghdfe (but slower):
 ```stata
 reghdfe price weight (length=gear), absorb(turn trunk) tol(1e-6) accel(sd) old
 ```
+
+### Residuals
+
+To save residuals, do this:
+
+```stata
+sysuse auto
+ivreghdfe price weight, absorb(trunk, resid(myresidname))
+```
+
+Notice the `resid()` option within absorb. If you call it without parenthesis,
+residuals will be saved in the variable `_reghdfe_resid`.
+
+You can also use the other predict options of `reghdfe`, such as `d`:
+
+```stata
+predict d, d
+```
