@@ -1,27 +1,65 @@
-
-Note: for now, reghdfe requires Stata 13 or up (until I add David Roodman's code)
+This package package adds an `absorb()` option to `ivreg2`, so we can run IV regressions
+with multiple fixed effects, as with `reghdfe`.
 
 
 ## Installation steps
 
-Ensure ivreg2 is installed:
+`ivreghdfe` requires three packages: `ivreg2`, `reghdfe` (version 4.x) and `ftools`. Run the lines below to install everything you might possibly need:
+
 
 ```
+* Install ftools (remove program if it existed previously)
+cap ado uninstall moresyntax
+cap ado uninstall ftools
+net install ftools, from("https://github.com/sergiocorreia/ftools/raw/master/src/")
+
+* Install reghdfe 4.x
+cap ado uninstall reghdfe
+net install reghdfe, from("https://github.com/sergiocorreia/reghdfe/raw/master/src/")
+
+* Install boottest for Stata 11 and 12
+if (c(version)<13) cap ado uninstall boottest
+if (c(version)<13) ssc install boottest
+
+* Install moremata (sometimes used by ftools but not needed for reghdfe)
+cap ssc install moremata
+
+* Install ivreg2, the core package
 ssc install ivreg2
+
+* Finally, install this package
+cap ado uninstall ivreghdfe
+net install ivreghdfe, from(https://github.com/sergiocorreia/ivreg2_demo/raw/master/)
 ```
 
-Install ivreg2hdfe (fake name so it doesn't clash)
+If you are in a server, you can also download the
+[zipfile](https://github.com/sergiocorreia/ivreg2_demo/archive/master.zip) and
+install it locally:
 
 ```
-cap ado uninstall ivreg2hdfe
-net install ivreg2hdfe, from(https://github.com/sergiocorreia/ivreg2_demo/raw/master/)
+cap ado uninstall ivreghdfe
+net install ivreghdfe, from(c:\git\ivreg2_demo)
 ```
 
+## Advice
 
-### Install locally:
+This code just modifies `ivreg2` adding an `absorb()` option that uses
+`reghdfe`s Mata functions.
+When used, `absorb()` will also activate the `small`, `noconstant` and `nopartialsmall`
+options of `ivreg2` (basically to force small sample adjustments, which are
+required as we might have a substantial number of fixed effects).
 
+If you need to pass optimization options directly to `reghdfe`
+(e.g. tolerance, choice of transform, etc.) you can do that as a suboption
+of `absorb()`:
 
+```stata
+sysuse auto, clear
+ivreghdfe price weight (length=gear), absorb(turn trunk, tol(1e-6) accel(sd))
 ```
-cap ado uninstall ivreg2hdfe
-net install ivreg2hdfe, from(c:\git\ivreg2_demo)
+
+This is gives the same result as using the old version of reghdfe (but slower):
+
+```stata
+reghdfe price weight (length=gear), absorb(turn trunk) tol(1e-6) accel(sd) old
 ```

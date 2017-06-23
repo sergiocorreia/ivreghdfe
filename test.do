@@ -5,21 +5,21 @@ noi cscript "ivreg2 with absorb()" adofile reghdfe
 	replace turn = . in 1 // ensure we detect MVs in absorb()
 
 
-* Test 1: ivreg2==ivreg2hdfe
+* Test 1: ivreg2==ivreghdfe
 
 	ivreg2 price weight (gear=length)
 	storedresults save benchmark e()
 
-	ivreg2hdfe price weight (gear=length)
+	ivreghdfe price weight (gear=length)
 	storedresults compare benchmark e(), exclude(macro: cmd cmdline ivreg2cmd)
 	storedresults drop benchmark
 
 
-* Test 2: ivreg2hdfe==ivreg+partial
+* Test 2: ivreghdfe==ivreg+partial
 	ivreg2 price weight i.turn , partial(i.turn) small
 	storedresults save benchmark e()
 
-	ivreg2hdfe price weight, absorb(turn, keepsingletons)
+	ivreghdfe price weight, absorb(turn, keepsingletons)
 	assert e(df_m)==1
 	loc excluded ///
 		macro: cmd cmdline ivreg2cmd insts inexog partial partial1 partialcons df_m ///
@@ -28,12 +28,12 @@ noi cscript "ivreg2 with absorb()" adofile reghdfe
 	storedresults drop benchmark
 
 
-* Test 3: ivreg2hdfe==reghdfe
+* Test 3: ivreghdfe==reghdfe
 	reghdfe price weight, absorb(turn) keepsingletons
 	loc bench_r2 = e(r2_within)
 	storedresults save benchmark e()
 
-	ivreg2hdfe price weight, absorb(turn, keepsingletons)
+	ivreghdfe price weight, absorb(turn, keepsingletons)
 	assert e(rank)==.
 	assert e(df_m)==1
 	assert abs(e(r2) - `bench_r2') < 1e-8
@@ -46,12 +46,12 @@ noi cscript "ivreg2 with absorb()" adofile reghdfe
 	// why does mss differs??
 
 
-* Test 4: ivreg2hdfe==reghdfe with TWFE and TWC
+* Test 4: ivreghdfe==reghdfe with TWFE and TWC
 	reghdfe price weight, absorb(turn foreign) cluster(turn trunk) keepsingletons
 	loc bench_r2 = e(r2_within)
 	storedresults save benchmark e()
 
-	ivreg2hdfe price weight, absorb(turn foreign, keepsingletons) cluster(turn trunk)
+	ivreghdfe price weight, absorb(turn foreign, keepsingletons) cluster(turn trunk)
 	assert e(rank)==.
 	assert e(df_m)==1
 	assert abs(e(r2) - `bench_r2') < 1e-8
@@ -68,7 +68,7 @@ noi cscript "ivreg2 with absorb()" adofile reghdfe
 	loc bench_r2 = e(r2_within)
 	storedresults save benchmark e()
 
-	ivreg2hdfe price weight, absorb(turn foreign) cluster(turn trunk)
+	ivreghdfe price weight, absorb(turn foreign) cluster(turn trunk)
 	assert e(rank)==.
 	assert e(df_m)==1
 	assert abs(e(r2) - `bench_r2') < 1e-8
@@ -80,12 +80,12 @@ noi cscript "ivreg2 with absorb()" adofile reghdfe
 	storedresults drop benchmark
 	// why does mss and rmse differ?
 
-* Test 5: ivreg2hdfe with IV
+* Test 5: ivreghdfe with IV
 	reghdfe price weight (gear=length), absorb(turn) cluster(trunk) keepsingletons old
 	loc bench_r2 = e(r2_within)
 	storedresults save benchmark e()
 
-	ivreg2hdfe price weight (gear=length), absorb(turn, keepsing) cluster(trunk)
+	ivreghdfe price weight (gear=length), absorb(turn, keepsing) cluster(trunk)
 	assert e(rank)==.
 	assert e(df_m)==2
 	assert abs(e(r2) - `bench_r2') < 1e-8

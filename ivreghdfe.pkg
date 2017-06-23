@@ -1,0 +1,5 @@
+v 3
+
+d Instrumental Variables with High Dimensional Fixed Effects (ivreg2 with an absorb() option)
+
+f ivreghdfe.ado
