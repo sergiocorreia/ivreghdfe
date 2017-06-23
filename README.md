@@ -28,6 +28,7 @@ cap ssc install moremata
 ssc install ivreg2
 
 * Finally, install this package
+cap ado uninstall ivreg2hdfe
 cap ado uninstall ivreghdfe
 net install ivreghdfe, from(https://github.com/sergiocorreia/ivreg2_demo/raw/master/)
 ```

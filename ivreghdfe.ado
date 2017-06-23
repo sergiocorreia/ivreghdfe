@@ -1,4 +1,4 @@
-*! ivreg2hdfe 0.0.2  23jun2017
+*! ivreghdfe 0.0.3  23jun2017
 *! this just adds absorb() to this code:
 *! ivreg2 4.1.10  9Feb2016
 *! authors cfb & mes
@@ -111,10 +111,12 @@ di as err "invalid syntax - cannot use by with replay"
 	else {
 		`BY' ivreg211 `0'
 		cap mata: mata drop HDFE // prefix ivreg211 call with capture?
+		cap mata: mata drop hdfe_residuals
 		ereturn local cmd "ivreghdfe"
 		ereturn local ivreg2cmd "ivreghdfe"
 		ereturn local version `lversion'
 		ereturn local predict ivreg2_p
+		if (e(N_hdfe)!=  .) ereturn local predict reghdfe_p
 	}
 
 end
@@ -1176,6 +1178,11 @@ di as err "         may be caused by collinearities"
 * No W matrix for LIML or kclass
 		capture mat colnames `W' = `cnZ1'
 		capture mat rownames `W' = `cnZ1'
+
+* Store residuals if requested
+mata: HDFE.residuals = (HDFE.residuals == "" & HDFE.save_any_fe) ? "__temp_reghdfe_resid__" : HDFE.residuals
+mata: st_local("residuals_name", HDFE.residuals)
+if ("`residuals_name'" != "") mata: hdfe_residuals = st_data(., "`resid'", "`touse'")
 
 *******************************************************************************************
 * RSS, counts, dofs, F-stat, small-sample corrections
@@ -2269,6 +2276,12 @@ di in red "Error: estimation failed - could not post estimation results"
 		if ("`absorb'" != "") {
 			mata: HDFE.post_footnote()
 			assert e(N_hdfe) != .
+			mata: st_local("residuals_name", HDFE.residuals)
+			if ("`residuals_name'" != "") {
+				mata: HDFE.save_variable(HDFE.residuals, hdfe_residuals, "Residuals")
+				mata: st_global("e(resid)", HDFE.residuals)
+				reghdfe_store_alphas
+			}
 		}
 	}
 
