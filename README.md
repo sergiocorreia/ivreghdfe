@@ -1,21 +1,34 @@
 This package package adds an `absorb()` option to `ivreg2`, so we can run IV regressions
 with multiple fixed effects, as with `reghdfe`.
 
+## Comparison with other commands
 
-## Installation steps
+As seen in the table below, `ivreghdfe` is recommended if you want to run IV/LIML/GMM2S regressions with fixed effects, or run OLS regressions with advanced standard errors (HAC, Kiefer, etc.)
 
-`ivreghdfe` requires three packages: `ivreg2`, `reghdfe` (version 4.x) and `ftools`. Run the lines below to install everything you might possibly need:
+| Command                   | regress | areg    | reghdfe   | ivreg2                               | ivreghdfe                            |
+|---------------------------|---------|---------|-----------|--------------------------------------|--------------------------------------|
+| Models:                   | OLS     | OLS     | OLS       | OLS, IV, LIML, GMM2S, CUE            | OLS, IV, LIML, GMM2S (not CUE!)      |
+| Fixed effects?            | -       | One-way | Multi-way | -                                    | Multi-way                            |
+| Cluster SE?               | One-way | One-way | Multi-way | Two-way                              | Two-way                              |
+| Additional SEs:           | -       | -       | -         | AC, HAC, Kiefer, Driscol-Kraay, etc. | AC, HAC, Kiefer, Driscol-Kraay, etc. |
+| (Speed) Time without FEs: | 1x      | -       | 2x        | 3.7x                                 | 4.3x                                 |
+| (Speed) Time with one FE: | -       | 6.3x    | 2.1x      | -                                    | 4.6x                                 |
+
+*([Benchmark](simple_benchmark.do) run on Stata 14-MP (4 cores), with a dataset of 4 regressors, 10mm obs., 100 clusters and 10,000 FEs)*
+
+## Installation
+
+`ivreghdfe` requires three packages: `ivreg2`, `reghdfe` (version 5.x) and `ftools`. Run the lines below to install everything you might possibly need:
 
 
 ```
 * Install ftools (remove program if it existed previously)
-cap ado uninstall moresyntax
 cap ado uninstall ftools
-net install ftools, from("https://github.com/sergiocorreia/ftools/raw/master/src/")
+net install ftools, from("https://raw.githubusercontent.com/sergiocorreia/ftools/master/src/")
 
 * Install reghdfe 4.x
 cap ado uninstall reghdfe
-net install reghdfe, from("https://github.com/sergiocorreia/reghdfe/raw/master/src/")
+net install reghdfe, from("https://raw.githubusercontent.com/sergiocorreia/reghdfe/master/src/")
 
 * Install boottest for Stata 11 and 12
 if (c(version)<13) cap ado uninstall boottest
@@ -30,16 +43,16 @@ ssc install ivreg2
 * Finally, install this package
 cap ado uninstall ivreg2hdfe
 cap ado uninstall ivreghdfe
-net install ivreghdfe, from(https://github.com/sergiocorreia/ivreg2_demo/raw/master/)
+net install ivreghdfe, from(https://raw.githubusercontent.com/sergiocorreia/ivreghdfe/master/src/)
 ```
 
 If you are in a server, you can also download the
-[zipfile](https://github.com/sergiocorreia/ivreg2_demo/archive/master.zip) and
+[zipfile](https://codeload.github.com/sergiocorreia/ivreghdfe/zip/master) and
 install it locally:
 
 ```
 cap ado uninstall ivreghdfe
-net install ivreghdfe, from(c:\git\ivreg2_demo)
+net install ivreghdfe, from(c:\git\ivreghdfe)
 ```
 
 ## Advice
