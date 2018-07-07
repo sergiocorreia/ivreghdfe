@@ -14,6 +14,7 @@ d 	reghdfe
 d 	ivreg2
 d 	boottest (for Stata version 12 or earlier)
 d
-d Distribution-Date: 20170623
+d Distribution-Date: 20180707
 
 f ivreghdfe.ado
+f ivreghdfe.sthlp

@@ -1,5 +1,5 @@
 This package package adds an `absorb()` option to `ivreg2`, so we can run IV regressions
-with multiple fixed effects, as with `reghdfe`.
+with multiple fixed effects, as in `reghdfe`.
 
 ## Comparison with other commands
 
@@ -58,7 +58,7 @@ net install ivreghdfe, from(c:\git\ivreghdfe)
 ## Advice
 
 This code just modifies `ivreg2` adding an `absorb()` option that uses
-`reghdfe`s Mata functions.
+`reghdfe`s Mata functions (see [this link](https://www.diffchecker.com/tzvmpKis) for the line-by-line differences).
 When used, `absorb()` will also activate the `small`, `noconstant` and `nopartialsmall`
 options of `ivreg2` (basically to force small sample adjustments, which are
 required as we might have a substantial number of fixed effects).
