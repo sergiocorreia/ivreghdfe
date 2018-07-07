@@ -1,0 +1,19 @@
+v 3
+
+d Instrumental Variables with High Dimensional Fixed Effects (ivreg2 with an absorb() option)
+d
+d KW: fixed effects
+d KW: ivreg2
+d KW: reghdfe
+d
+d Requires: Stata version 11.2
+d
+d Required packages:
+d 	ftools
+d 	reghdfe
+d 	ivreg2
+d 	boottest (for Stata version 12 or earlier)
+d
+d Distribution-Date: 20170623
+
+f ivreghdfe.ado

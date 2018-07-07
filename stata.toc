@@ -1,2 +1,0 @@
-v 3
-p ivreg2hdfe ivreg2hdfe - Demo of ivreg2 with absorb()

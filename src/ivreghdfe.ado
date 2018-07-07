@@ -1,3 +1,5 @@
+*! ivreghdfe 0.0.3  23jun2017
+*! this just adds absorb() to this code:
 *! ivreg2 4.1.10  9Feb2016
 *! authors cfb & mes
 *! see end of file for version comments
@@ -35,7 +37,7 @@ if c(version) < 12 & c(version) >= 9 {
 
 * Parent program, forks to versions as appropriate after version call
 * Requires byable(onecall)
-program define ivreg2hdfe, eclass byable(onecall) /* properties(svyj) */ sortpreserve
+program define ivreghdfe, eclass byable(onecall) /* properties(svyj) */ sortpreserve
 	local lversion 04.1.10
 
 * Minimum of version 8 required for parent program (earliest ivreg2 is ivreg28)
@@ -86,13 +88,13 @@ di as err "invalid syntax - cannot use by with replay"
 		if replay() {
 			ereturn local cmd "`ivreg2cmd'"
 			`ivreg2cmd' `0'
-			ereturn local cmd "ivreg2hdfe"
+			ereturn local cmd "ivreg2"
 
 		}
 		else {
 * If not replay, call legacy ivreg2 and then add macros
 			`BY' `ivreg2cmd' `0'
-			ereturn local cmd "ivreg2hdfe"
+			ereturn local cmd "ivreghdfe"
 			ereturn local ivreg2cmd "`ivreg2cmd'"
 			ereturn local version `lversion'
 			ereturn local predict ivreg2_p
@@ -108,10 +110,13 @@ di as err "invalid syntax - cannot use by with replay"
 // If not replay, call ivreg211 and then add macros
 	else {
 		`BY' ivreg211 `0'
-		ereturn local cmd "ivreg2hdfe"
-		ereturn local ivreg2cmd "ivreg2hdfe"
+		cap mata: mata drop HDFE // prefix ivreg211 call with capture?
+		cap mata: mata drop hdfe_residuals
+		ereturn local cmd "ivreghdfe"
+		ereturn local ivreg2cmd "ivreghdfe"
 		ereturn local version `lversion'
 		ereturn local predict ivreg2_p
+		if (e(N_hdfe)!=  .) ereturn local predict reghdfe_p
 	}
 
 end
@@ -166,7 +171,7 @@ program define ivreg211, eclass byable(recall) sortpreserve
 			ereturn local version `lversion'
 			exit
 		}
-		if `"`e(cmd)'"' != "ivreg2hdfe"  {
+		if `"`e(cmd)'"' != "ivreghdfe"  {
 			error 301
 		}
 // Set display options
@@ -205,6 +210,7 @@ program define ivreg211, eclass byable(recall) sortpreserve
 				LIML COVIV FULLER(real 0) Kclass(real 0)			///
 				ORTHOG(string) ENDOGtest(string) REDundant(string)	///
 				PARTIAL(string) FWL(string)							///
+				Absorb(string)           							///
 				Level(integer $S_level)								///
 				NOHEader NOFOoter NOOUTput							///
 				bvclean NOOMITTED omitted vsquish noemptycells		///
@@ -218,6 +224,29 @@ program define ivreg211, eclass byable(recall) sortpreserve
 				NOPARTIALSMALL										///
 				fvall fvsep											///
 				]
+
+	if (`"`absorb'"' != "") {
+		// ensure reghdfe is installed
+		capture which reghdfe
+		if c(rc) {
+			di as err "Error: must have reghdfe installed"
+			di as err "To install, from within Stata type " _c
+			//di in smcl "{stata ssc install reghdfe :ssc install reghdfe}"
+			loc url "https://github.com/sergiocorreia/reghdfe/raw/version-4/src/"
+			di in smcl `"{stata `"net install reghdfe, from(`url')"':net install reghdfe, from(`url')}"'
+			exit 601
+		}
+		cap reghdfe, requirements // ensure ftools, moresyntax, etc. are installed
+		if (c(rc)) reghdfe, requirements
+		
+		reghdfe, check // ensure the .mlib exists
+
+		// absorb implies...
+		local small small
+		local noconstant noconstant
+		local nopartialsmall
+	}
+
 
 // Parse after clearing any sreturn macros (can be left behind in Stata 11)
 		sreturn clear
@@ -361,6 +390,17 @@ program define ivreg211, eclass byable(recall) sortpreserve
 		}
 		else {
 			markout `touse' `lhs' `inexog' `exexog' `endo' `cluster', strok
+		}
+
+		* Create HDFE object and update touse
+		if (`"`absorb'"' != "") {
+			* fixed_effects(absvars | , touse, wtype, wtvar, dropsing, verbose)
+			mata: HDFE = fixed_effects("`absorb'", "`touse'", "`weight'", "`wvar'")
+			_assert ("`s(options)'"==""), msg("unsupported options in {bf:absorb()}: `s(options)'")
+			mata: HDFE.clustervars = HDFE.base_clustervars = tokens("`cluster'")
+			mata: HDFE.num_clusters = length(HDFE.clustervars)
+			mata: HDFE.estimate_dof() // compute degrees-of-freedom
+			mata: HDFE.save_touse("`touse'", 1) // 1 = overwrite
 		}
 
 ********************************************************************************
@@ -532,7 +572,7 @@ di as err "Error: `wrongvars' listed in redundant() but does not appear as exoge
 // *************** Partial-out block ************** //
 
 // `partial' has all to be partialled out except for constant
-		if "`partial1'" != "" | `partialcons'==1 {
+		if "`partial1'" != "" | `partialcons'==1 | "`absorb'" != "" {
 			preserve
 
 // Remove partial0 from inexog0.
@@ -581,19 +621,32 @@ di in r "       in combination with -partial- option."
 // Partial out
 // But first replace everything with doubles
 			recast double `fv_lhs1' `fv_endo1' `fv_inexog1' `fv_exexog1' `fv_partial1'
-			mata: s_partial	("`fv_lhs1'",			///
-							"`fv_endo1'",			///
-							"`fv_inexog1'",			///
-							"`fv_exexog1'",			///
-							"`fv_partial1'",		///
-							"`touse'",				///
-							"`weight'",				///
-							"`wvar'",				///
-							`wf',					///
-							`N',					///
-							`cons')
 
-			local partial_ct : word count `partial1'
+			if ("`absorb'" != "") {
+				local hdfe_varlist `fv_lhs1' `fv_endo1' `fv_inexog1' `fv_exexog1' `fv_partial1'
+				mata: st_store(HDFE.sample, tokens("`hdfe_varlist'"), HDFE.partial_out(tokens("`hdfe_varlist'")))
+				mata: st_local("absorb_ct", strofreal(HDFE.df_a))
+				assert `absorb_ct'`' != .
+				if (`absorb_ct'==0) local absorb_ct 1 // adjustment to match ivreg2 and old reghdfe (happens if absvar is nested in cluster)
+				local partial_ct 0
+				local partialcons `absorb_ct'
+			}
+
+			if ("`partial1'" != "" | `partialcons'==1) {
+				mata: s_partial	("`fv_lhs1'",			///
+								"`fv_endo1'",			///
+								"`fv_inexog1'",			///
+								"`fv_exexog1'",			///
+								"`fv_partial1'",		///
+								"`touse'",				///
+								"`weight'",				///
+								"`wvar'",				///
+								`wf',					///
+								`N',					///
+								`cons')
+				local partial_ct : word count `partial1'
+			}
+
 // Constant is partialled out, unless nocons already specified in the first place
 			capture drop `ones'
 			local ones ""
@@ -602,6 +655,10 @@ di in r "       in combination with -partial- option."
 				local partial_ct = `partial_ct' + 1
 				local noconstant "noconstant"
 				local cons 0
+			}
+
+			if ("`absorb'" != "") {
+				local partial_ct = `partial_ct' + `absorb_ct'
 			}
 		}
 		else {
@@ -1121,6 +1178,11 @@ di as err "         may be caused by collinearities"
 * No W matrix for LIML or kclass
 		capture mat colnames `W' = `cnZ1'
 		capture mat rownames `W' = `cnZ1'
+
+* Store residuals if requested
+mata: HDFE.residuals = (HDFE.residuals == "" & HDFE.save_any_fe) ? "__temp_reghdfe_resid__" : HDFE.residuals
+mata: st_local("residuals_name", HDFE.residuals)
+if ("`residuals_name'" != "") mata: hdfe_residuals = st_data(., "`resid'", "`touse'")
 
 *******************************************************************************************
 * RSS, counts, dofs, F-stat, small-sample corrections
@@ -1822,7 +1884,7 @@ di in r "       including constant."
 *******************************************************************************************
 
 // restore data if preserved for partial option
-		if `partial_ct' {
+		if (`partial_ct' | "`absorb'"!="") {
 			restore
 		}
 
@@ -2209,6 +2271,17 @@ di in red "Error: estimation failed - could not post estimation results"
 		}
 		if "`sw'"~="" {
 			ereturn local hacsubtitleV "Stock-Watson heteroskedastic-robust statistics (BETA VERSION)"
+		}
+
+		if ("`absorb'" != "") {
+			mata: HDFE.post_footnote()
+			assert e(N_hdfe) != .
+			mata: st_local("residuals_name", HDFE.residuals)
+			if ("`residuals_name'" != "") {
+				mata: HDFE.save_variable(HDFE.residuals, hdfe_residuals, "Residuals")
+				mata: st_global("e(resid)", HDFE.residuals)
+				reghdfe_store_alphas
+			}
 		}
 	}
 
@@ -2686,6 +2759,8 @@ di in gr _col(23) "    variables in regressor count K"
 			Disp `e(ecollin)', _col(23)
 		}
 		di in smcl in gr "{hline 78}"
+
+		if (e(N_hdfe)!=  .) reghdfe_footnote
 	}
 end
 
@@ -3230,6 +3305,10 @@ program define PostFirstRF, eclass
 		ereturn local hacsubtitleV "Stock-Watson heteroskedastic-robust statistics (BETA VERSION)"
 	}
 
+	if ("`absorb'" != "") {
+		mata: HDFE.post_footnote()
+		assert e(N_hdfe) != .
+	}
 end
 
 

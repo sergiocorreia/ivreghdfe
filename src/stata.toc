@@ -1,0 +1,2 @@
+v 3
+p ivreghdfe ivreghdfe - Demo of ivreg2 with absorb()
