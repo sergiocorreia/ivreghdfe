@@ -1,2 +1,2 @@
 v 3
-p ivreghdfe ivreghdfe - Demo of ivreg2 with absorb()
+p ivreghdfe ivreghdfe - ivreg2 augmented with absorb()

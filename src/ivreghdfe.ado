@@ -1180,9 +1180,11 @@ di as err "         may be caused by collinearities"
 		capture mat rownames `W' = `cnZ1'
 
 * Store residuals if requested
-mata: HDFE.residuals = (HDFE.residuals == "" & HDFE.save_any_fe) ? "__temp_reghdfe_resid__" : HDFE.residuals
-mata: st_local("residuals_name", HDFE.residuals)
-if ("`residuals_name'" != "") mata: hdfe_residuals = st_data(., "`resid'", "`touse'")
+if (`"`absorb'"' != "") {
+	mata: HDFE.residuals = (HDFE.residuals == "" & HDFE.save_any_fe) ? "__temp_reghdfe_resid__" : HDFE.residuals
+	mata: st_local("residuals_name", HDFE.residuals)
+	if ("`residuals_name'" != "") mata: hdfe_residuals = st_data(., "`resid'", "`touse'")
+}
 
 *******************************************************************************************
 * RSS, counts, dofs, F-stat, small-sample corrections
