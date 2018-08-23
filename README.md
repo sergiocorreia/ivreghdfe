@@ -1,5 +1,4 @@
-This package package adds an `absorb()` option to `ivreg2`, so we can run IV regressions
-with multiple fixed effects, as in `reghdfe`.
+This package integrates `reghdfe` into `ivreg2`, through an `absorb()` option. This allows IV/2SLS regressions with multiple levels of fixed effects.
 
 ## Comparison with other commands
 
@@ -26,11 +25,11 @@ As seen in the table below, `ivreghdfe` is recommended if you want to run IV/LIM
 cap ado uninstall ftools
 net install ftools, from("https://raw.githubusercontent.com/sergiocorreia/ftools/master/src/")
 
-* Install reghdfe 4.x
+* Install reghdfe
 cap ado uninstall reghdfe
 net install reghdfe, from("https://raw.githubusercontent.com/sergiocorreia/reghdfe/master/src/")
 
-* Install boottest for Stata 11 and 12
+* Install boottest (Stata 11 and 12)
 if (c(version)<13) cap ado uninstall boottest
 if (c(version)<13) ssc install boottest
 
@@ -38,10 +37,10 @@ if (c(version)<13) ssc install boottest
 cap ssc install moremata
 
 * Install ivreg2, the core package
+cap ado uninstall ivreg2
 ssc install ivreg2
 
 * Finally, install this package
-cap ado uninstall ivreg2hdfe
 cap ado uninstall ivreghdfe
 net install ivreghdfe, from(https://raw.githubusercontent.com/sergiocorreia/ivreghdfe/master/src/)
 ```
