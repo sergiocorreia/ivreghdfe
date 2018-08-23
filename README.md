@@ -1,4 +1,4 @@
-This package integrates `reghdfe` into `ivreg2`, through an `absorb()` option. This allows IV/2SLS regressions with multiple levels of fixed effects.
+This package integrates [`reghdfe`](https://github.com/sergiocorreia/reghdfe/) into [`ivreg2`](https://ideas.repec.org/c/boc/bocode/s425401.html), through an `absorb()` option. This allows IV/2SLS regressions with multiple levels of fixed effects.
 
 ## Comparison with other commands
 
