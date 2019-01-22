@@ -97,7 +97,7 @@ di as err "invalid syntax - cannot use by with replay"
 			ereturn local cmd "ivreghdfe"
 			ereturn local ivreg2cmd "`ivreg2cmd'"
 			ereturn local version `lversion'
-			ereturn local predict ivreg2_p
+			ereturn local predict reghdfe // ivreg2_p
 		}
 		exit
 	}
@@ -1925,6 +1925,9 @@ di in red "Error: estimation failed - could not post estimation results"
 		else {															//  don't allow margins
 			ereturn local marginsnotok	"Residuals SCores XB default"
 		}
+
+		// Override; dangerous
+		ereturn local marginsnotok	"Residuals SCores"
 
 // Original varlists without removed duplicates, collinears, etc.
 // "0" varlists after removing duplicates and reclassifying vars, and including omitteds, FV base vars, etc.
