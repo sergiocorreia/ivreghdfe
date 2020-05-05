@@ -1,4 +1,4 @@
-*! ivreghdfe 1.0.0  07jul2018
+*! ivreghdfe 1.0.1  05may2020
 *! this just adds absorb() to this code:
 *! ivreg2 4.1.10  9Feb2016
 *! authors cfb & mes
@@ -88,7 +88,7 @@ di as err "invalid syntax - cannot use by with replay"
 		if replay() {
 			ereturn local cmd "`ivreg2cmd'"
 			`ivreg2cmd' `0'
-			ereturn local cmd "ivreg2"
+			ereturn local cmd "ivreghdfe"
 
 		}
 		else {
