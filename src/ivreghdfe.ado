@@ -1,4 +1,4 @@
-*! ivreghdfe 1.0.1  05may2020
+*! ivreghdfe 1.0.2  07jun2020
 *! this just adds absorb() to this code:
 *! ivreg2 4.1.10  9Feb2016
 *! authors cfb & mes
@@ -2436,7 +2436,7 @@ end
 
 // ************* Display main estimation outpout ************** //
 
-program define DispMain, eclass
+program define DispMain, rclass
 	args noheader plus level nofooter helpfile dispopt
 	version 11.2
 * Prepare for problem resulting from rank(S) being insufficient
@@ -2521,9 +2521,16 @@ di
 * Unfortunate but necessary hack here: to suppress message about cluster adjustment of
 *   standard error, clear e(clustvar) and then reset it after display
 	local cluster `e(clustvar)'
-	ereturn local clustvar
-	ereturn display, `plus' level(`level') `dispopt'
-	ereturn local clustvar `cluster'
+	* ereturn local clustvar
+	* ereturn display, `plus' level(`level') `dispopt'
+	* ereturn local clustvar `cluster'
+
+* Sergio: workaround but not 100% sure that it will always work as wanted
+* Trick: _coef_table.ado just calls a Mata function that reads locals
+	local noclustreport noclustreport // undocumented in _coef_table.ado
+	mata: _coef_table()
+	return add // adds r(level), r(table), etc. to ereturn (before the footnote deletes them)
+
 
 * Display 1st footer with identification stats
 * Footer not displayed if -nofooter- option or if pure OLS, i.e., model="ols" and Sargan-Hansen=0
