@@ -1,4 +1,4 @@
-*! ivreghdfe 1.0.2  07jun2020
+*! ivreghdfe 1.0.3  22jun2020
 *! this just adds absorb() to this code:
 *! ivreg2 4.1.10  9Feb2016
 *! authors cfb & mes
@@ -2282,7 +2282,7 @@ di in red "Error: estimation failed - could not post estimation results"
 			if ("`residuals_name'" != "") {
 				mata: HDFE.save_variable(HDFE.residuals, hdfe_residuals, "Residuals")
 				mata: st_global("e(resid)", HDFE.residuals)
-				reghdfe_store_alphas
+				reghdfe, store_alphas
 			}
 		}
 	}
