@@ -399,7 +399,7 @@ program define ivreg211, eclass byable(recall) sortpreserve
 * Create HDFE object and update touse
 if (`"`absorb'"' != "") {
 	if (`"`cluster'"' != "") loc reghdfe_options `"`reghdfe_options' vce(cluster `cluster')"'
-        reghdfe `touse', `reghdfe_options' // create HDFE object
+    reghdfe `touse', varlist_is_touse `reghdfe_options' // create HDFE object
 }
 
 ********************************************************************************
