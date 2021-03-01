@@ -237,7 +237,7 @@ program define ivreg211, eclass byable(recall) sortpreserve
                 loc small small
                 loc noconstant noconstant
                 loc nopartialsmall
-                loc reghdfe_options `"absorb(`absorb') `options' nopartialout"' // (nopartialout implies keepmata)
+                loc reghdfe_options `"absorb(`absorb') `options' nopartialout varlist_is_touse"' // (nopartialout implies keepmata)
 
                 if ("`residuals2'" != "") {
                     cap drop _reghdfe_resid // destructive!
@@ -399,7 +399,7 @@ program define ivreg211, eclass byable(recall) sortpreserve
 * Create HDFE object and update touse
 if (`"`absorb'"' != "") {
 	if (`"`cluster'"' != "") loc reghdfe_options `"`reghdfe_options' vce(cluster `cluster')"'
-    reghdfe `touse', varlist_is_touse `reghdfe_options' // create HDFE object
+    reghdfe `touse', `reghdfe_options' // create HDFE object
 }
 
 ********************************************************************************
