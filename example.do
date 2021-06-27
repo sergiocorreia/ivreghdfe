@@ -1,21 +1,18 @@
 version 13 // currently needs 13 or 14
 
 * Install requirements
-	cap ado uninstall moresyntax
-	net install moresyntax, from("C:/git/moresyntax/src")
 
+	* ftools
 	cap ado uninstall ftools
-	net install ftools, from("C:/git/ftools/src")
-	ftools, compile
+	net install ftools, from("C:/Git/ftools/src")
 
-* Instal reghdfe
+	* reghdfe
 	cap ado uninstall reghdfe
-	net install reghdfe , from("https://github.com/sergiocorreia/reghdfe/raw/version-4/src/")
-	reghdfe, compile
+	net install reghdfe , from("C:/Git/groupreg/src/")
 
-* Install demo
+* Install ivreghdfe
 	cap ado uninstall ivreghdfe
-	net install ivreghdfe, from("https://github.com/sergiocorreia/ivreg2_demo/raw/master/")
+	net install ivreghdfe, from("C:/Git/ivreghdfe/src/")
 	//net install ivreghdfe, from(c:\git\ivreg2_demo)
 
 * Setup
@@ -33,10 +30,10 @@ version 13 // currently needs 13 or 14
 	ivreghdfe // ensure replay() works
 
 * Test absorb()
-	ivreghdfe price weight, absorb(turn)
+	ivreghdfe price weight, absorb(turn) resid
 	ivreghdfe // ensure replay() works
 
-* Benchmark
+	* Benchmark
 	reghdfe price weight, a(turn) keepsingletons
 
 

@@ -1,5 +1,19 @@
 This package integrates [`reghdfe`](https://github.com/sergiocorreia/reghdfe/) into [`ivreg2`](https://ideas.repec.org/c/boc/bocode/s425401.html), through an `absorb()` option. This allows IV/2SLS regressions with multiple levels of fixed effects.
 
+## Recent updates
+
+- **version 1.1 26feb2021**:
+	- Update `ivreg2` dependency from _4.1.10 9Feb2016_ to  _4.1.11 22Nov2019_.
+	- Update `reghdfe` dependency from _5.9.0 03jun2020_ to _6.0.2 25feb2021_
+	- Before, reghdfe options had to be passed as suboptions of `absorb()`. Now they are passed directly as normal options
+	- Note that some options are slightly different in reghdfe v6 (e.g. the exact technique used is set through the `technique()` option, following Stata convention).
+	- Note that there might be a tiny difference in the SE estimates of ivreghdfe wrt those in reghdfe when both are used to run OLS instead of IV.
+		- This happens if we have clustered standard errors, and the fixed effects are nested within the clusters.
+		- Then, when computing the small sample adjustment `q`, reghdfe divides by (N-K-1) while ivreg2 (and thus ivreghdfe) divides by (N-K)
+		- `reghdfe` does so to keep consistency with the small sample adjustment done by `xtreg`
+		- For more details see comment in code ("minor adj. so we match xtreg when the absvar is nested within cluster")
+
+
 ## Comparison with other commands
 
 As seen in the table below, `ivreghdfe` is recommended if you want to run IV/LIML/GMM2S regressions with fixed effects, or run OLS regressions with advanced standard errors (HAC, Kiefer, etc.)
@@ -29,13 +43,6 @@ net install ftools, from("https://raw.githubusercontent.com/sergiocorreia/ftools
 cap ado uninstall reghdfe
 net install reghdfe, from("https://raw.githubusercontent.com/sergiocorreia/reghdfe/master/src/")
 
-* Install boottest (Stata 11 and 12)
-if (c(version)<13) cap ado uninstall boottest
-if (c(version)<13) ssc install boottest
-
-* Install moremata (sometimes used by ftools but not needed for reghdfe)
-cap ssc install moremata
-
 * Install ivreg2, the core package
 cap ado uninstall ivreg2
 ssc install ivreg2
@@ -43,15 +50,6 @@ ssc install ivreg2
 * Finally, install this package
 cap ado uninstall ivreghdfe
 net install ivreghdfe, from(https://raw.githubusercontent.com/sergiocorreia/ivreghdfe/master/src/)
-```
-
-If you are in a server, you can also download the
-[zipfile](https://codeload.github.com/sergiocorreia/ivreghdfe/zip/master) and
-install it locally:
-
-```
-cap ado uninstall ivreghdfe
-net install ivreghdfe, from(c:\git\ivreghdfe)
 ```
 
 ## Advice
@@ -62,19 +60,18 @@ When used, `absorb()` will also activate the `small`, `noconstant` and `nopartia
 options of `ivreg2` (basically to force small sample adjustments, which are
 required as we might have a substantial number of fixed effects).
 
-If you need to pass optimization options directly to `reghdfe`
-(e.g. tolerance, choice of transform, etc.) you can do that as a suboption
-of `absorb()`:
+You can also use all other reghdfe options as normal options of `ivreghdfe`
+(e.g. tolerance, choice of transform, etc.):
 
 ```stata
 sysuse auto, clear
-ivreghdfe price weight (length=gear), absorb(turn trunk, tol(1e-6) accel(sd))
+ivreghdfe price weight (length=gear), absorb(turn trunk) tol(1e-6) accel(sd)
 ```
 
 This is gives the same result as using the old version of reghdfe (but slower):
 
 ```stata
-reghdfe price weight (length=gear), absorb(turn trunk) tol(1e-6) accel(sd) old
+reghdfe price weight (length=gear), absorb(turn trunk) tol(1e-6) accel(sd) version(3)
 ```
 
 ### Residuals
@@ -83,11 +80,8 @@ To save residuals, do this:
 
 ```stata
 sysuse auto
-ivreghdfe price weight, absorb(trunk, resid(myresidname))
+ivreghdfe price weight, absorb(trunk) resid(myresidname)
 ```
-
-Notice the `resid()` option within absorb. If you call it without parenthesis,
-residuals will be saved in the variable `_reghdfe_resid`.
 
 You can also use the other predict options of `reghdfe`, such as `d`:
 
