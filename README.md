@@ -1,5 +1,5 @@
 # IVREGHDFE: reghdfe + ivreg2 (adds instrumental variable and additional robust SE estimators to reghdfe)
-![GitHub release (latest by date)](https://img.shields.io/github/v/release/sergiocorreia/ivreghdfe?label=last version)
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/sergiocorreia/ivreghdfe?label=last%20version)
 ![GitHub Release Date](https://img.shields.io/github/release-date/sergiocorreia/ivreghdfe)
 ![GitHub commits since latest release (by date)](https://img.shields.io/github/commits-since/sergiocorreia/ivreghdfe/latest)
 ![StataMin](https://img.shields.io/badge/stata-%3E%3D%2012.1-blue)
