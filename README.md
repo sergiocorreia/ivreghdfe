@@ -3,7 +3,7 @@
 ![GitHub Release Date](https://img.shields.io/github/release-date/sergiocorreia/ivreghdfe)
 ![GitHub commits since latest release (by date)](https://img.shields.io/github/commits-since/sergiocorreia/ivreghdfe/latest)
 ![StataMin](https://img.shields.io/badge/stata-%3E%3D%2012.1-blue)
-[![DOI](https://zenodo.org/badge/63449974.svg)](https://zenodo.org/badge/latestdoi/63449974)
+[![DOI](https://zenodo.org/badge/82003805.svg)](https://zenodo.org/badge/latestdoi/82003805)
 - Jump to: [`usage`](#usage) [`benchmarks`](#benchmarks) [`install`](#installation)
 
 This package integrates [`reghdfe`](https://github.com/sergiocorreia/reghdfe/) into [`ivreg2`](https://ideas.repec.org/c/boc/bocode/s425401.html), through an `absorb()` option. This allows IV/2SLS regressions with multiple levels of fixed effects.
