@@ -1,4 +1,4 @@
-*! ivreghdfe 1.1.0  25Feb2021
+*! ivreghdfe 1.2.0  20Oct2021
 *! ivreg2 4.1.11  22Nov2019
 *! authors cfb & mes
 *! see end of file for version comments
@@ -399,7 +399,8 @@ program define ivreg211, eclass byable(recall) sortpreserve
 * Create HDFE object and update touse
 if (`"`absorb'"' != "") {
 	if (`"`cluster'"' != "") loc reghdfe_options `"`reghdfe_options' vce(cluster `cluster')"'
-    reghdfe `touse', `reghdfe_options' // create HDFE object
+    loc equal = cond("`weight'"!="", "=", "")
+    reghdfe `touse' [`weight'`equal'`exp'], `reghdfe_options' // create HDFE object
 }
 
 ********************************************************************************
