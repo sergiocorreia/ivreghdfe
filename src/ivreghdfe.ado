@@ -1,3 +1,4 @@
+*! ivreghdfe 1.1.1  14Dec2021 (experimental -margins- support)
 *! ivreghdfe 1.1.0  25Feb2021
 *! ivreg2 4.1.11  22Nov2019
 *! authors cfb & mes
@@ -122,7 +123,7 @@ di as err "invalid syntax - cannot use by with replay"
                 ereturn local cmd "ivreghdfe"
                 ereturn local ivreg2cmd "ivreghdfe"
                 ereturn local version `lversion'
-                ereturn local predict ivreg2_p
+                ereturn local predict reghdfe // ivreg2_p    <- to enable -predict- and -margins-
                 ereturn local cmdline ivreg2 `0'                //  `0' rather than `*' in case of any "s in string
                 if (e(N_hdfe)!=  .) ereturn local predict reghdfe_p
                 cap mata: mata drop HDFE // prefix ivreg211 call with capture?
@@ -1921,8 +1922,9 @@ di in red "Error: estimation failed - could not post estimation results"
                 }
 
                 local mok       =1                                                                                                      //  default - margins OK
-                local mok       = `mok' & ~`partial_ct'                                                         //  but not if partialling out
-                local mok       = `mok' & ~(`fvops' & `bvclean')                                        //  nor if there are FVs and the base vars are not in e(b)
+                * ivreghdfe 1.1.1: Override to enable -margins-; dangerous
+                *local mok       = `mok' & ~`partial_ct'                                                         //  but not if partialling out
+                *local mok       = `mok' & ~(`fvops' & `bvclean')                                        //  nor if there are FVs and the base vars are not in e(b)
                 if `mok' & `endo1_ct' {                                                                                 //  margins can be used, endog regressors
                         ereturn local marginsnotok      "Residuals SCores"                              //  same as official -ivregress-
                         ereturn local marginsok         "XB default"
