@@ -10,6 +10,8 @@ This package integrates [`reghdfe`](https://github.com/sergiocorreia/reghdfe/) i
 
 ## Recent updates
 
+- **version 1.1.1 14dec2021**:
+	- Add experimental support for `margins` postestimation command.
 - **version 1.1 26feb2021**:
 	- Update `ivreg2` dependency from _4.1.10 9Feb2016_ to  _4.1.11 22Nov2019_.
 	- Update `reghdfe` dependency from _5.9.0 03jun2020_ to _6.0.2 25feb2021_
