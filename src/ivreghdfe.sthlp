@@ -42,6 +42,11 @@ Linear Models with High-Dimensional Fixed Effects: An Efficient and Feasible Est
 {browse "https://github.com/sergiocorreia/reghdfe/#citation":https://github.com/sergiocorreia/reghdfe/#citation}{p_end}
 
 
+{title:Support for margins}
+
+Note that there is experimental support for the {cmd:margins} postestimation command, but it hasn't been tested with advanced options such as nonlinear expressions.
+
+
 {title:Feedback}
 
 For any issues or suggestions, please see the {browse "https://github.com/sergiocorreia/ivreghdfe":Github} website, including the {browse "https://github.com/sergiocorreia/ivreghdfe/issues":issue tracker}.
