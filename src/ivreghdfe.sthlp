@@ -1,5 +1,5 @@
 {smcl}
-{* *! version 1.1.0  25feb2021}{...}
+{* *! version 1.1.1 14Dec2021}{...}
 {vieweralsosee "ivreg" "help ivreg2"}{...}
 {vieweralsosee "reghdfe" "help reghdfe"}{...}
 {vieweralsosee "ftools" "help ftools"}{...}
