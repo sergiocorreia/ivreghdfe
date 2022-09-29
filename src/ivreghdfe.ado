@@ -125,7 +125,7 @@ di as err "invalid syntax - cannot use by with replay"
                 ereturn local ivreg2cmd "ivreghdfe"
                 ereturn local version `lversion'
                 ereturn local predict reghdfe // ivreg2_p    <- to enable -predict- and -margins-
-                ereturn local cmdline ivreg2 `0'                //  `0' rather than `*' in case of any "s in string
+                ereturn local cmdline ivreghdfe `0'                //  `0' rather than `*' in case of any "s in string
                 if (e(N_hdfe)!=  .) ereturn local predict reghdfe_p
                 cap mata: mata drop HDFE // prefix ivreg211 call with capture?
                 cap mata: mata drop hdfe_residuals
