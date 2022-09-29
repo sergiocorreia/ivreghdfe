@@ -1,3 +1,4 @@
+*! ivreghdfe 1.1.2  29Sep2022 (bugfix for github issue #44)
 *! ivreghdfe 1.1.1  14Dec2021 (experimental -margins- support)
 *! ivreghdfe 1.1.0  25Feb2021
 *! ivreg2 4.1.11  22Nov2019
@@ -211,6 +212,7 @@ program define ivreg211, eclass byable(recall) sortpreserve
                                 SFIRST SAVESFIRST SAVESFPrefix(name)                            ///
                                 SMall NOConstant                                                                        ///
                                 Robust CLuster(varlist) kiefer dkraay(integer 0)        ///
+                                VCE(string) ///
                                 BW(string) kernel(string) center                                        ///
                                 GMM GMM2s CUE                                                                           ///
                                 LIML COVIV FULLER(real 0) Kclass(real 0)                        ///
@@ -232,6 +234,24 @@ program define ivreg211, eclass byable(recall) sortpreserve
                                 fvall fvsep                                                                                     ///
                                 caller(real 0)                                                                          ///
                                 * ]
+    
+        * Allow cluster(vars) as a shortcut for vce(cluster vars)
+        if ("`vce'"!="") {
+            _assert ("`cluster'"==""), msg("only one of cluster() and vce() can be specified") rc(198)
+            _assert ("`robust'"==""), msg("only one of robust() and vce() can be specified") rc(198)
+            gettoken vce_type vce_rest : vce
+            _assert inlist("`vce_type'", "cluster", "robust", "unadjusted"), msg("vce() only supports cluster, robust, and unadjusted") rc(198)
+
+            if ("`vce_type'" == "cluster") {
+                loc cluster "`vce_rest'"
+                _assert ("`vce_rest'"!=""), msg("vce(cluster ...) requires variables") rc(198)
+            }
+            if ("`vce_type'" == "robust") {
+                _assert ("`vce_rest'"==""), msg("vce(robust) does not support varnames or other options") rc(198)
+                loc robust "robust"
+            }
+            loc vce // clear out local just to be sure (as it's used later in the code for other purposes)
+        }
 
         if (`"`absorb'"' != "") {
                 // absorb implies...

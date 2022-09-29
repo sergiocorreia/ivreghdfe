@@ -10,6 +10,8 @@ This package integrates [`reghdfe`](https://github.com/sergiocorreia/reghdfe/) i
 
 ## Recent updates
 
+- **version 1.1.2 29Sep2022**:
+	- Fix bug #44; where cluster(...) worked but vce(cluster ...) was silently ignored
 - **version 1.1.1 14dec2021**:
 	- Add experimental support for `margins` postestimation command.
 - **version 1.1 26feb2021**:
