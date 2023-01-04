@@ -1,3 +1,4 @@
+*! ivreghdfe 1.1.3  04Jan2023 (bugfix for github issue #48)
 *! ivreghdfe 1.1.2  29Sep2022 (bugfix for github issue #44)
 *! ivreghdfe 1.1.1  14Dec2021 (experimental -margins- support)
 *! ivreghdfe 1.1.0  25Feb2021
@@ -41,7 +42,7 @@ if c(version) < 12 & c(version) >= 9 {
 program define ivreghdfe, eclass byable(onecall) /* properties(svyj) */ sortpreserve
         local lversion 04.1.11
 
-        ms_get_version ftools, min_version("2.45.0")
+        ms_get_version ftools, min_version("2.48.0")
         ms_get_version reghdfe, min_version("6.0.2")
 
 * local to store Stata version of calling program
@@ -419,8 +420,9 @@ program define ivreg211, eclass byable(recall) sortpreserve
 
 * Create HDFE object and update touse
 if (`"`absorb'"' != "") {
+    if ("`weight'" != "") loc reghdfe_weight "[`weight'=`wvar']"
 	if (`"`cluster'"' != "") loc reghdfe_options `"`reghdfe_options' vce(cluster `cluster')"'
-    reghdfe `touse', `reghdfe_options' // create HDFE object
+    reghdfe `touse' `reghdfe_weight', `reghdfe_options' // create HDFE object
 }
 
 ********************************************************************************

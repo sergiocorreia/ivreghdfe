@@ -8,7 +8,7 @@ version 13 // currently needs 13 or 14
 
 	* reghdfe
 	cap ado uninstall reghdfe
-	net install reghdfe , from("C:/Git/groupreg/src/")
+	net install reghdfe , from("C:/Git/reghdfe/src/")
 
 * Install ivreghdfe
 	cap ado uninstall ivreghdfe
