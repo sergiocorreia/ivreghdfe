@@ -44,17 +44,24 @@ As seen in the table below, `ivreghdfe` is recommended if you want to run IV/LIM
 
 ## Installation
 
-`ivreghdfe` requires three packages: `ivreg2`, `reghdfe` (version 5.x) and `ftools`. Run the lines below to install everything you might possibly need:
+`ivreghdfe` requires three packages: `ivreg2`, `reghdfe` (version 5.x) and `ftools`. Run the lines below to install everything you might possibly need. You can install the latest version by using `global ivrvers master`, otherwise specify the precise version.
 
 
 ```
+* Set versions
+global ftvers  master
+global rhvers  master
+global ivrvers master
+* Use an older version
+* global ivrvers 1.1.2
+
 * Install ftools (remove program if it existed previously)
 cap ado uninstall ftools
-net install ftools, from("https://raw.githubusercontent.com/sergiocorreia/ftools/master/src/")
+net install ftools, from("https://raw.githubusercontent.com/sergiocorreia/ftools/$ftvers/src/")
 
 * Install reghdfe
 cap ado uninstall reghdfe
-net install reghdfe, from("https://raw.githubusercontent.com/sergiocorreia/reghdfe/master/src/")
+net install reghdfe, from("https://raw.githubusercontent.com/sergiocorreia/reghdfe/$rhvers/src/")
 
 * Install ivreg2, the core package
 cap ado uninstall ivreg2
@@ -62,7 +69,7 @@ ssc install ivreg2
 
 * Finally, install this package
 cap ado uninstall ivreghdfe
-net install ivreghdfe, from(https://raw.githubusercontent.com/sergiocorreia/ivreghdfe/master/src/)
+net install ivreghdfe, from(https://raw.githubusercontent.com/sergiocorreia/ivreghdfe/$ivrvers/src/)
 ```
 
 ## Advice
