@@ -1,3 +1,4 @@
+*! ivreghdfe 1.1.4  29nov2025 (bugfix for github issue #61)
 *! ivreghdfe 1.1.3  04Jan2023 (bugfix for github issue #48)
 *! ivreghdfe 1.1.2  29Sep2022 (bugfix for github issue #44)
 *! ivreghdfe 1.1.1  14Dec2021 (experimental -margins- support)
@@ -42,8 +43,8 @@ if c(version) < 12 & c(version) >= 9 {
 program define ivreghdfe, eclass byable(onecall) /* properties(svyj) */ sortpreserve
         local lversion 04.1.11
 
-        ms_get_version ftools, min_version("2.48.0")
-        ms_get_version reghdfe, min_version("6.0.2")
+        ms_get_version ftools, min_version("2.49.1")
+        ms_get_version reghdfe, min_version("6.12.5")
 
 * local to store Stata version of calling program
         local caller = _caller()
@@ -596,6 +597,21 @@ di as err "Error: `wrongvars' listed in redundant() but does not appear as exoge
 // `partial' has all to be partialled out except for constant
                 if "`partial1'" != "" | `partialcons'==1 | "`absorb'" != "" {
                         preserve
+
+                        *====================================================================
+                        * IVREGHDFE BLOCK
+                        *====================================================================
+                        * Need to save resids if saving FEs, even if temporarily
+                        mata: st_local("save_any_fe", strofreal(HDFE.save_any_fe))
+                        if ("`residuals'" == "" & `save_any_fe') {
+                                loc residuals "__temp_reghdfe_resid__"
+                        }
+
+                        if ("`residuals'" != "") {
+                                tempvar sortpreserve2
+                                gen double `sortpreserve2' = _n
+                        }
+                        *====================================================================
 
 // Remove partial0 from inexog0.
 // Remove partial1 from inexog1.
@@ -1203,15 +1219,17 @@ di as err "         may be caused by collinearities"
                 capture mat colnames `W' = `cnZ1'
                 capture mat rownames `W' = `cnZ1'
 
+*====================================================================
+* IVREGHDFE BLOCK
+*====================================================================
 * Store residuals if requested
-if (`"`absorb'"' != "") {
-    * Need to save resids if saving FEs, even if temporarily
-    mata: st_local("save_any_fe", strofreal(HDFE.save_any_fe))
-    if ("`residuals'" == "" & `save_any_fe') {
-    	loc residuals "__temp_reghdfe_resid__"
-    }
-    mata: HDFE.solution.resid = st_data(., "`resid'", "`touse'")
+if (`"`absorb'"' != "" & "`residuals'" != "") {
+    mata: HDFE.solution.resid = st_data(., "`resid' `touse' `sortpreserve2'") // Load three vars: resid, sample dummy, and sort order
+    mata: HDFE.solution.resid = sort(HDFE.solution.resid, 3) // sort matrix by sortorder
+    mata: HDFE.solution.resid = select(HDFE.solution.resid[., 1], HDFE.solution.resid[., 2]) // keep first column, within sample
+    * mata: HDFE.solution.resid = st_data(., "`resid'", "`touse'") // This would be the code if there was no preserve/sort    
 }
+*====================================================================
 
 
 *******************************************************************************************

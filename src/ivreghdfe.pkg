@@ -6,7 +6,7 @@ d KW: fixed effects
 d KW: ivreg2
 d KW: reghdfe
 d
-d Requires: Stata version 11.2
+d Requires: Stata version 13.0
 d
 d Required packages:
 d 	ftools
@@ -14,7 +14,7 @@ d 	reghdfe
 d 	ivreg2
 d 	boottest (for Stata version 12 or earlier)
 d
-d Distribution-Date: 20211214
+d Distribution-Date: 20251129
 
 f ivreghdfe.ado
 f ivreghdfe.sthlp

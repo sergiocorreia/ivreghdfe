@@ -10,6 +10,8 @@ This package integrates [`reghdfe`](https://github.com/sergiocorreia/reghdfe/) i
 
 ## Recent updates
 
+- **version 1.1.4 29Nov2025**:
+	- Fix bug #61; where `resid(...)` returned incorrectly sorted residuals if these three conditions were met: i) `cluster(...)` was used, and ii) data was not already sorted by cluster, and iii) data was not `xtset` or `tsset`
 - **version 1.1.2 29Sep2022**:
 	- Fix bug #44; where cluster(...) worked but vce(cluster ...) was silently ignored
 	- Fix bug #46; small correction to e(cmdline)
