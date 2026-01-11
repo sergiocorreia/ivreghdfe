@@ -12,6 +12,7 @@ d Required packages:
 d 	ftools
 d 	reghdfe
 d 	ivreg2
+d 	ranktest
 d 	boottest (for Stata version 12 or earlier)
 d
 d Distribution-Date: 20251129
