@@ -9,6 +9,7 @@ d
 d Requires: Stata version 13.0
 d
 d Required packages:
+d 	require
 d 	ftools
 d 	reghdfe
 d 	ivreg2
